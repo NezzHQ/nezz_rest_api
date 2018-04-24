@@ -401,10 +401,24 @@ WHERE ( user_account.userId IN (SELECT talent_skills.user_id FROM talent_skills 
         return $response;
     }
 
-
-    function loginviaFacebook($device_id)
+    function loginviaFacebook($user_id)
     {
-        $userId = $this->db->query("SELECT user_devices.user_id FROM user_devices WHERE user_devices.device_id='$device_id'")->row_array();
+        $userId = $this->db->query("SELECT user_devices.user_id FROM user_devices WHERE user_devices.user_id='$user_id'")->row_array();
+        $response = array();
+
+        if (count($userId) > 0) {
+            $userId = $userId["user_id"];
+            $response = $this->getPersonalDetails($userId);
+        } else {
+            //  have to work on this
+        }
+
+        return $response;
+    }
+
+    function logintoFacebookviaUserId($user_id)
+    {
+        $userId = $this->db->query("SELECT user_devices.user_id FROM user_devices WHERE user_devices.user_id='$user_id'")->row_array();
         $response = array();
 
         if (count($userId) > 0) {
@@ -419,7 +433,7 @@ WHERE ( user_account.userId IN (SELECT talent_skills.user_id FROM talent_skills 
 
 
     // notification
-    function editNotification($user_id,$enable)
+    function editNotification($user_id,$enable,$device_token)
     {
         $response = array();
         $status_dic = $this->db->query("SELECT user_account.allow_notif FROM user_account WHERE user_account.userId = '$user_id' ")->row_array();
@@ -718,16 +732,41 @@ WHERE ( user_account.userId IN (SELECT talent_skills.user_id FROM talent_skills 
     }
 
 
+    // device token exist for push notification
+    public function DeviceTokenCheck($token)
+    {
+        $flag = false;
+
+        if($this->db->query("SELECT n_p_id FROM naaz_push_notification WHERE device_token = '$token'")->num_rows() > 0)
+        {
+            $flag = true;
+        }
+
+        return $flag;
+    }
 
     // adding and enabling device token
     public function AddingPushNotification($packet,$flag)
     {
         $response = array();
+
+
+        $this->load->model("accounts_model","a_m");
+
+        if($this->a_m->DeviceTokenCheck($packet['device_token']))
+        {
+            $flag = "old";
+        }
+        else {
+            $flag = "new";
+        }
+
         switch ($flag) {
             case "new":
                 if ($this->db->insert("naaz_push_notification", $packet)) {
                     $response["status"] = 1;
                     $response["message"] = "Successfully Added";
+                    $response["enable"] = $packet["enable"];
                 } else {
                     $response["status"] = 0;
                     $response["message"] = "Error Occured";
@@ -738,13 +777,14 @@ WHERE ( user_account.userId IN (SELECT talent_skills.user_id FROM talent_skills 
                 if ($this->db->update("naaz_push_notification", $packet,array("device_token"=>$packet["device_token"]))) {
                     $response["status"] = 1;
                     $response["message"] = "Successfully Updated";
+                    $response["enable"] = $packet["enable"];
                 } else {
                     $response["status"] = 0;
                     $response["message"] = "Error Occured";
                 }
                 break;
 
-            }
+        }
 
 
 

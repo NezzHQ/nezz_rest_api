@@ -49,7 +49,7 @@ class accounts extends CI_Controller {
             }
         }
 
-       echo json_encode($response);
+        echo json_encode($response);
     }
 
 
@@ -111,18 +111,53 @@ class accounts extends CI_Controller {
 
 
     // login with facebook
-    public function LoginWithFacebook() {
+    public function CheckForFacebook() {
+        $response = array();
+
+        if(isset($_GET["facebook_user_id"]))
+        {
+            $facebook_user_id = $_GET["facebook_user_id"];
+
+            if($facebook_user_id != '')
+            {
+                $this->load->model("accounts_model","a_c");
+
+                $data = $this->a_c->logintoFacebookviaUserId($facebook_user_id);
+
+                if(count($data) > 0)
+                {
+                    $response["status"] = 1;
+                    $response["user_data"] = $data;
+                }
+                else {
+                    $response["status"] = 0;
+                    $response["message"] = "No User found";
+                }
+
+
+            }
+        }
+
+        echo json_encode($response);
+    }
+
+
+
+    // sign up with facebook
+    public function SignUpWithFacebook() {
         $response = array();
 
         if(isset($_GET["DeviceToken"]))
         {
             $device_token = $_GET["DeviceToken"];
+            $user_id = $_GET['id'];
 
             if($device_token != '')
             {
                 $this->load->model("accounts_model","a_c");
 
-                $data = $this->a_c->loginviaFacebook($device_token);
+                $data = $this->a_c->loginviaFacebook($user_id);
+
 
                 if(count($data) > 0)
                 {
@@ -131,31 +166,23 @@ class accounts extends CI_Controller {
                 }
                 else {
 
-                    if(isset($_GET["Email"]) and isset($_GET["first_name"]) and isset($_GET['last_name']) and isset($_GET['id']))
-                    {
-                        if(($_GET["Email"] != '') and ($_GET["first_name"] != '') and ($_GET['last_name'] != '') and ($_GET['id'] != ''))
-                        {
-                            $res = $this->a_c->signUpEmail(array("DeviceToken"=>$device_token,"email"=>$_GET['Email'],"first_name"=>$_GET["first_name"],"last_name"=>$_GET["last_name"],"password"=>$_GET['id'],"userId"=>$_GET['id']));
+                    if (isset($_GET["Email"]) and isset($_GET["first_name"]) and isset($_GET['last_name']) and isset($_GET['id'])) {
+                        if (($_GET["Email"] != '') and ($_GET["first_name"] != '') and ($_GET['last_name'] != '') and ($_GET['id'] != '')) {
+                            $res = $this->a_c->signUpEmail(array("DeviceToken" => $device_token, "email" => $_GET['Email'], "first_name" => $_GET["first_name"], "last_name" => $_GET["last_name"], "password" => $_GET['id'], "userId" => $_GET['id']));
 
-                            if($res["status"] == 1)
-                            {
-                                $data = $this->a_c->loginviaFacebook($device_token);
+                            if ($res["status"] == 1) {
+                                $data = $this->a_c->loginviaFacebook($user_id);
 
                                 $response["status"] = 1;
                                 $response["user_data"] = $data;
-                            }
-                            else {
+                            } else {
                                 $response = $res;
                             }
 
                         }
-
-
-                    }
-                    else {
+                    } else {
                         $response["status"] = 0;
                     }
-
                 }
 
             }
@@ -163,6 +190,8 @@ class accounts extends CI_Controller {
 
         echo json_encode($response);
     }
+
+
 
 
     // sign up using reqular form
@@ -484,13 +513,14 @@ class accounts extends CI_Controller {
 
         if(count($_POST) > 0)
         {
-
-            if(isset($_POST['DeviceToken']) and isset($_POST['enable']) and isset($_POST['user_type']))
+            if(isset($_POST['DeviceToken']) and isset($_POST['enable']))
             {
 
                 $device_token = $_POST['DeviceToken'];
                 $enable = $_POST['enable'];
-                $flag = $_POST['user_type'];
+                $flag = "new";
+
+
 
                 $response = $this->a_m->AddingPushNotification(array("device_token"=>$device_token,"enable"=>$enable),$flag);
             }

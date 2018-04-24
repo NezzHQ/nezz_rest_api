@@ -2,8 +2,13 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="df764a78-b26b-4ffa-a3c5-2ec1c6b4ec2f" name="XAMPP" url="http://localhost">
-        <fileTransfer port="0" mountedRoot="$PROJECT_DIR$/.." accessType="MOUNT" />
+      <webServer id="bde1a7e5-2e83-4dc9-9f42-c6b7f30d298f" name="accordms" url="http://96.67.153.186">
+        <fileTransfer host="96.67.153.186" port="226" privateKey="$USER_HOME$/Downloads/ali.pem" accessType="SFTP" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="226" />
+        </fileTransfer>
       </webServer>
     </option>
   </component>

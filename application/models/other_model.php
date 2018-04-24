@@ -163,9 +163,9 @@ class other_model extends CI_Model {
                         <td>Name:</td> <td>".$packet["user_name"]."</td>
                     </tr>
                     
-//                    <tr>
-//                        <td>UserId:</td> <td>".$packet["user_id"]."</td>
-//                    </tr>
+                    <tr>
+                        <td>UserId:</td> <td>".$packet["user_id"]."</td>
+                    </tr>
                     
                     <tr>
                         <td>Email:</td> <td>".$packet["user_email"]."</td>
@@ -177,7 +177,7 @@ class other_model extends CI_Model {
                     
                     </table>";
 
-        $status = mail("bens@nezz.io",$packet["user_subject"],$message,$headers);
+        $status = mail("abdullah017196@gmail.com",$packet["user_subject"],$message,$headers);
 
         return $status;
     }
